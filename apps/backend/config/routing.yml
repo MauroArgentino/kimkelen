@@ -27,6 +27,19 @@ api_get_students:
     options: { model: StudentCareerSchoolYear, type: object, method: getStudentsForYear }
     requirements:
       sf_format: json
+      
+api_personal_data:
+  url: /api/personas/:id/datospersonales
+  param:   { module: api, action: getPersonalData }
+  
+api_analytical_data:
+  url: /api/personas/:id/datosanalitico
+  param:   { module: api, action: getAnalyticalData }
+
+api_person:
+  url: /api/personas
+  param:   { module: api, action: getPerson }
+
     
 change_status_motive:
   class: sfPropelRouteCollection
@@ -154,7 +167,23 @@ average_report:
 course_subject_student_mark_change_log:
   url:  /showMarkChangeLog
   param:  {module: course_student_mark, action: showMarkChangeLog }
+  
+tutor_aggregate_teacher:
+   url: tutor/aggregateAsTeacher
+   param: { module: tutor, action: aggregateAsTeacher }
 
+tutor_aggregate_preceptor:
+   url: tutor/aggregateAsPreceptor
+   param: { module: tutor, action: aggregateAsPreceptor }
+   
+teacher_aggregate_tutor:
+   url: teacher/aggregateAsTutor
+   param: { module: teacher, action: aggregateAsTutor }
+   
+personal_aggregate_tutor:
+   url: personal/aggregateAsTutor
+   param: { module: personal, action: aggregateAsTutor }
+   
 resources:
   class: sfPropelRouteCollection
   options:

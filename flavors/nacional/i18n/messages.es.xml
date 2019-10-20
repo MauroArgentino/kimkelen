@@ -1081,8 +1081,8 @@
             </trans-unit>
 
             <trans-unit>
-                <source>The student must be registered to career before you can manage allowed subjects.</source>
-                <target>El alumno debe estar inscripto en una carrera antes de que puedan administrarse sus materias a cursar.</target>
+                <source>The student must be registered to career and enrolled before you can manage allowed subjects.</source>
+                <target>El alumno debe estar inscripto en una carrera y matriculado antes de que puedan administrarse sus materias a cursar.</target>
             </trans-unit>
 
             <trans-unit>
@@ -4727,6 +4727,38 @@
             <trans-unit>
                 <source>Career edit</source>
                 <target>Editar inscripción a carrera</target>
+            </trans-unit>
+            <trans-unit>
+                <source>Generate profile profesor for tutor %tutor%</source>
+                <target>Generar perfil profesor para el tutor %tutor%</target>
+            </trans-unit>
+            <trans-unit>
+                <source>File number</source>
+                <target>Legajo</target>
+            </trans-unit>
+            <trans-unit>
+                <source>Generate profile preceptor for tutor %tutor%</source>
+                <target>Generar perfil preceptor para el tutor %tutor%</target>
+            </trans-unit>
+            <trans-unit>
+                <source>Aggregate as a tutor</source>
+                <target>Agregar como tutor</target>
+            </trans-unit>
+            <trans-unit>
+                <source>Generate profile tutor for teacher %teacher%</source>
+                <target>Generar perfil tutor para el profesor %teacher%</target>
+            </trans-unit>
+            <trans-unit>
+                <source>The tutor has been created succesfuly.</source>
+                <target>El tutor fue creado exitosamente.</target>
+            </trans-unit>
+            <trans-unit>
+                <source>Generate profile tutor for preceptor %preceptor%</source>
+                <target>Generar perfil tutor para el preceptor %preceptor%</target>
+            </trans-unit>
+            <trans-unit>
+                <source>If is checked, then will show only students who attend theoretical classes.</source>
+                <target>Si esta chequeado, solo se mostraran alumnos que asistan a clases teóricas.</target>
             </trans-unit>
         </body>
     </file>

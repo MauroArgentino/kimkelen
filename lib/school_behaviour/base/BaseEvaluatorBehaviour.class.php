@@ -137,6 +137,15 @@ class BaseEvaluatorBehaviour extends InterfaceEvaluatorBehaviour
         if (!is_null($result))
         {
           $result->close($con);
+          $log = new LogCloseCareerSchoolYear();
+          $log->setCourseSubjectStudent($course_subject_student);
+          $log->setCourseResult(get_class($result));
+          $log->setCourseResultId($result->getId());
+          $log->setUsername(sfContext::getInstance()->getUser());
+          
+          $log->save();
+          $log->clearAllReferences(true);
+          
         }
       }
       ###Liberando memoria ###
@@ -470,7 +479,8 @@ class BaseEvaluatorBehaviour extends InterfaceEvaluatorBehaviour
 		if ($student_examination_repproved_subject->getMark() >= $this->getExaminationNote())
 		{
 			$student_approved_career_subject = new StudentApprovedCareerSubject();
-			$student_approved_career_subject->setCareerSubject($student_examination_repproved_subject->getExaminationRepprovedSubject()->getCareerSubject());
+                        $car_sub = $student_examination_repproved_subject->getStudentRepprovedCourseSubject()->getCourseSubjectStudent()->getCourseSubject()->getCareerSubject();
+                        $student_approved_career_subject->setCareerSubject($car_sub);
 			$student_approved_career_subject->setStudent($student_examination_repproved_subject->getStudent());
 			$student_approved_career_subject->setSchoolYear($student_examination_repproved_subject->getExaminationRepprovedSubject()->getExaminationRepproved()->getSchoolYear());
 

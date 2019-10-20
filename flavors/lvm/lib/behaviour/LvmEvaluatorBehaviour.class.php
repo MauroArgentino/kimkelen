@@ -274,8 +274,17 @@ class LvmEvaluatorBehaviour extends BaseEvaluatorBehaviour
       if (!is_null($result))
       {
         $result->close($con);
+        
+        $log = new LogCloseCareerSchoolYear();
+        $log->setCourseSubjectStudent($course_subject_student);
+        $log->setCourseResult(get_class($result));
+        $log->setCourseResultId($result->getId());
+        $log->setUsername(sfContext::getInstance()->getUser());
+
+        $log->save();
         ###Liberando memoria ###
         $result->clearAllReferences(true);
+        $log->clearAllReferences(true);
         unset($result);
       }
       $course_subject_student->clearAllReferences(true);
@@ -667,28 +676,6 @@ class LvmEvaluatorBehaviour extends BaseEvaluatorBehaviour
     /*instance of StudentRepprovedCourseSubject*/
     /*No se crea nada ya que se debe inscribir en la mesa.*/
     
-  }
-  
-  public function getLastStudentCareerSchoolYearCoursed($student)
-  {
-    $c = new Criteria();
-    $c->addJoin(StudentCareerSchoolYearPeer::CAREER_SCHOOL_YEAR_ID, CareerSchoolYearPeer::ID);    
-    $c->addJoin(CareerSchoolYearPeer::SCHOOL_YEAR_ID, SchoolYearPeer::ID);
-    $c->addJoin(CareerSubjectSchoolYearPeer::CAREER_SCHOOL_YEAR_ID, CareerSchoolYearPeer::ID);
-    $c->addJoin(CourseSubjectPeer::CAREER_SUBJECT_SCHOOL_YEAR_ID, CareerSubjectSchoolYearPeer::ID);
-    $c->addJoin(CourseSubjectStudentPeer::COURSE_SUBJECT_ID, CourseSubjectPeer::ID);
-    $c->addJoin(CourseSubjectStudentMarkPeer::COURSE_SUBJECT_STUDENT_ID, CourseSubjectStudentPeer::ID);
-    $c->add(StudentCareerSchoolYearPeer::STUDENT_ID,$student->getId());
-    $c->add(CourseSubjectStudentPeer::STUDENT_ID, $student->getId());
-    $c->add(CourseSubjectStudentMarkPeer::MARK,NULL, Criteria::NOT_EQUAL);
-    $c->addAnd(CourseSubjectStudentMarkPeer::IS_FREE,FALSE);
-   
-    $c->addAnd(CourseSubjectStudentMarkPeer::IS_CLOSED,TRUE);
-    $c->addJoin(CourseSubjectPeer::ID, StudentApprovedCourseSubjectPeer::COURSE_SUBJECT_ID);
-    
-    $c->addDescendingOrderByColumn(StudentCareerSchoolYearPeer::CREATED_AT);
-    $c->addDescendingOrderByColumn(StudentCareerSchoolYearPeer::YEAR);
-    return StudentCareerSchoolYearPeer::doSelectOne($c);
   }
 
     public function getAnualAverageWithDisapprovedSubjects($student_career_school_year)

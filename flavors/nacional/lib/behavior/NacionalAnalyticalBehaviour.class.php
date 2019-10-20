@@ -25,31 +25,25 @@ class NacionalAnalyticalBehaviour extends DefaultAnalyticalBehaviour
         switch(get_class($approvationInstance)) {
           case 'StudentApprovedCourseSubject':
             //return November/July
-            if($approvationInstance->getCourseSubject()->getCourseType() != CourseType::TRIMESTER)
-            {
                 $period = $approvationInstance->getCourseSubject()->getLastCareerSchoolYearPeriod();
                 if(!is_null($period))
                 {
-                    $month = date('m', strtotime($period->getEndAt()));
-                    if($month > 11 ){
-                        return $approvationInstance->getSchoolYear()->getYear()."-11-30";
-                    }
                   return $period->getEndAt();
                 }
                 break;
-            }
-            else{
-                return $approvationInstance->getSchoolYear()->getYear()."-11-30";
-            }
-           
-            break;
+                
           case 'StudentDisapprovedCourseSubject': 
               //return December/February
             $cssid = $approvationInstance->getCourseSubjectStudentId();
             $csse = CourseSubjectStudentExaminationPeer::retrieveLastByCourseSubjectStudentId($cssid);
             $exam = $csse->getExaminationSubject()->getExamination();
-                        
-            return ($csse->getExaminationSubject()->getDate()) ? $csse->getExaminationSubject()->getDate() : $exam->getDateFrom();
+            if ($csse->getDate())
+            {
+                return $csse->getDate();
+            }else
+            {
+                return ($csse->getExaminationSubject()->getDate()) ? $csse->getExaminationSubject()->getDate() : $exam->getDateFrom();
+            }
           case 'StudentRepprovedCourseSubject':
                
             $sers = StudentExaminationRepprovedSubjectPeer::retrieveByStudentRepprovedCourseSubject($approvationInstance); 
