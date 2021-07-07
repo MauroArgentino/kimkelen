@@ -1,4 +1,5 @@
-<?php /*
+<?php
+/*
  * Kimkëlen - School Management Software
  * Copyright (C) 2013 CeSPI - UNLP <desarrollo@cespi.unlp.edu.ar>
  *
@@ -17,17 +18,17 @@
  * along with Kimkëlen.  If not, see <http://www.gnu.org/licenses/gpl-2.0.html>.
  */ ?>
 
-<?php use_stylesheet('/css/report-card.css') ?>
-<?php use_helper('Date') ?>
-<div class="certificate-wrapper">
-	<div class="report-content">
-		<?php include_partial('certificate_header');?>
-		<div class="report-text">
-			<?php include_partial('certificate_regular_text',array('student'=> $student));?>
-			<?php include_partial('certificate_footer_text');?>
-		</div>
-		<div id="signature"><?php echo __('Firma de la Autoridad')?></div>
-	</div>
-</div>
-
-
+  
+    <?php if (count($records_sheets)): ?>
+<div class="warning change_status">
+       <?php echo __('El folio físico ' . $records_sheets[0]->getPhysicalSheet(). ' del libro ' .$records_sheets[0]->getBook() . ' ya se encuentra asignado en:')?>
+        <?php foreach ($records_sheets as $rs): ?>
+          
+      <ul>
+          <li> <?php echo $rs->getRecord()->getFullName()?></li>
+      </ul> 
+          
+        <?php endforeach ;?>
+    </div>
+      <?php endif; ?>
+  

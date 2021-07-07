@@ -261,8 +261,7 @@ class Course extends BaseCourse
   public function canManageSubjects(PropelPDO $con = null)
   {
     return ($this->countStudents() == 0) && $this->isCurrentSchoolYear();
-    ;
-
+    
   }
 
   public function getMessageCantManageSubjects()
@@ -436,8 +435,16 @@ class Course extends BaseCourse
         $this->setIsClosed(true);
       }
 
-      $this->updatePeriod($con);
+      if($this->getCourseSubject()->isNotAverageable())
+      {
+          $this->setCurrentPeriod($this->getCurrentPeriod()+ 1);
+      }
+      else
+      {
+          $this->updatePeriod($con);
 
+      }
+      
 
       $this->save($con);
       $con->commit();
@@ -1125,6 +1132,85 @@ class Course extends BaseCourse
   public function canPathwayAttendanceSubject()
   { 
       return !$this->getIsClosed();
+  }
+  
+  public function canAssignPhysicalSheet()
+  {
+      foreach ($this->getCourseSubjects() as $cs)
+      {
+          $r = RecordPeer::retrieveByCourseOriginIdAndRecordType($cs->getId(), RecordType::COURSE);
+          if (! is_null($r))
+          {
+              return TRUE;
+          }
+      }
+
+    return FALSE;
+  }
+
+  public function canGenerateRecord()
+  { 
+      if ($this->isPathway())
+      {
+            $setting = SettingParameterPeer::retrieveByName(BaseSchoolBehaviour::LINES_PATHWAY);
+            foreach ($this->getCourseSubjects() as $cs)
+            {   $record = RecordPeer::retrieveByCourseOriginIdAndRecordType($cs->getId(), RecordType::COURSE);
+                if ($cs->getCountStudents() != 0 && ! is_null($setting->getValue()) && is_null($record))
+                {
+                    return TRUE;
+                }
+            }
+      }
+      else
+      {
+            $setting = SettingParameterPeer::retrieveByName(BaseSchoolBehaviour::LINES_COURSES);
+            foreach ($this->getCourseSubjects() as $cs)
+            {   $record = RecordPeer::retrieveByCourseOriginIdAndRecordType($cs->getId(), RecordType::COURSE);
+                if ($this->getIsClosed() && ! is_null($setting->getValue()) && is_null($record))
+                {
+                    return TRUE;
+                }
+            }
+      }
+       
+    return FALSE ;
+  }
+  
+  public function canPrintRecord()
+  {
+      return $this->canAssignPhysicalSheet();
+  }
+  
+  public function canRegenerateRecord()
+  { 
+      if ($this->isPathway())
+      {
+            $setting = SettingParameterPeer::retrieveByName(BaseSchoolBehaviour::LINES_PATHWAY);
+            foreach ($this->getCourseSubjects() as $cs)
+            {
+                $r = RecordPeer::retrieveByCourseOriginIdAndRecordType($cs->getId(), RecordType::COURSE);
+                if ($cs->getCountStudents() != 0 && ! is_null($setting->getValue()) && !is_null($r))
+                {
+                    return TRUE;
+                }
+            }
+      }
+      else
+      {
+           $setting = SettingParameterPeer::retrieveByName(BaseSchoolBehaviour::LINES_COURSES);
+          
+           foreach ($this->getCourseSubjects() as $cs)
+            {
+                $r = RecordPeer::retrieveByCourseOriginIdAndRecordType($cs->getId(), RecordType::COURSE);
+                if ($this->getIsClosed()  && ! is_null($setting->getValue()) && !is_null($r))
+                {
+                    return TRUE;
+                }
+            }
+      }
+       
+    return FALSE;  
+      
   }
 }
 sfPropelBehavior::add('Course', array('changelog'));

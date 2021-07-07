@@ -81,13 +81,30 @@ generator:
           calificateNonNumericalMark:
             label:          Calificate non numerical mark
             action:         calificateNonNumericalMark
-            credentials:    [edit_division_course_califications]
+            credentials:    [calificate_non_numerical_mark]
             condition:      canCalificate
+           
+          calificateNonNumericalMarkInCurrentPeriod:
+            label: Calificate non numerical mark in current period
+            action: calificateNonNumericalMarkInCurrentPeriod
+            credentials: [edit_division_course_califications]
+            condition:    canCalificate
+          
+          revertCalificateNonNumericalMarkInCurrentPeriod:
+            label: Revert calificate non numerical mark in current period
+            action: revertCalificateNonNumericalMarkInCurrentPeriod
+            credentials: [edit_division_course_califications]
+            condition:    canCalificate
 
           califications:
             action:         califications
             credentials:    [edit_division_course_califications]
             condition:      canEditMarks
+            
+          not_averageable_califications:
+            action:      notAverageableCalifications
+            credentials: [edit_division_course_califications]
+            condition:    canCalificate
 
           changelog:
             action:         changelogMarks
@@ -133,6 +150,27 @@ generator:
           _delete:
             condition:      canBeDeleted
             credentials:    [edit_course]
+          
+          assign_physical_sheet:
+            action: assignPhysicalSheet
+            condition: canAssignPhysicalSheet
+            credentials: [assign_physical_sheet]
+  
+          generate_record:
+            action: generateRecord
+            condition: canGenerateRecord
+            credentials: [generate_record]
+                
+          regenerate_record:
+            action: generateRecord
+            condition: canRegenerateRecord
+            credentials: [generate_record]
+            params:         confirm='¿Está seguro? Si regenera el acta se perderán los datos generados anteriormente.'
+          
+          print_record:
+            action: printRecord
+            condition: canPrintRecord
+            credentials: [print_record]
 
       filter:
       form:    ~

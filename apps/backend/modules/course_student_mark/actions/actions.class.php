@@ -144,7 +144,43 @@ class course_student_markActions extends sfActions
       foreach ($this->forms as $form)
       {
         $form->save();
+        
+        if($this->getCourse()->getIsPathway())
+        {
+            foreach($this->course_subjects as $cs)
+            {
+                $cs->saveCalificationsInRecord();
+            }
+        }
       }
+
+     //Para el caso de las observaciones finales
+      $course_subjects = $this->getCourse()->getCourseSubjects();
+      $all_closed = true;
+      foreach ($course_subjects as $cs)
+      { $calification_final = 0;
+        foreach($cs->getCourseSubjectStudents() as $css)
+        {
+            if(!is_null($css->getObservationFinal()))
+            {
+               $calification_final ++;
+            }
+        }
+        $result = false;
+        if($calification_final == count($cs->getCourseSubjectStudents()))
+        {
+            $result = true;
+        }
+        $all_closed = $all_closed && $result;
+      }
+
+      if ($all_closed)
+      {
+        $course = $this->getCourse()->setIsClosed(true);
+        $course->save(); 
+
+      }
+      //FIN para el caso de las observaciones finales
 
       $this->getUser()->setFlash('notice', 'Las calificaciones se guardaron satisfactoriamente.');
       return $this->redirect(sprintf('@%s', $this->getUser()->getAttribute('referer_module', 'homepage')));
@@ -258,5 +294,185 @@ class course_student_markActions extends sfActions
     $this->setTemplate('print');
  
   }
+  
+  public function executeAssignPhysicalSheet(sfWebRequest $request)
+  {
+    $this->cs = CourseSubjectPeer::retrieveByPK($request->getParameter('course_subject_id'));
+      
+    $record = RecordPeer::retrieveByCourseOriginIdAndRecordType($this->cs->getId(), RecordType::COURSE);
+    $this->books = BookPeer::retrieveActives();
+    $this->forms= array();
+    $this->record_sheet = $record->getRecordSheet();
+    foreach ($record->getRecordSheets() as $rs)
+    {
+        $form = new RecordSheetForm($rs);
+        $form->getWidgetSchema()->setNameFormat("record_sheet_{$rs->getId()}[%s]");
+        $this->forms[$rs->getId()]= $form;
+    }
+      
+    if ($request->isMethod("post"))
+    {
+      $valid = count($this->forms);
+
+      foreach ($this->forms as $form)
+      {
+        $form->bind($request->getParameter($form->getName()));
+
+        if ($form->isValid())
+        {
+          $valid--;
+        }
+      }
+
+      if ($valid == 0)
+      { 
+        foreach ($this->forms as $form)
+        {
+          $form->save();
+        }
+        $this->getUser()->setFlash('notice', 'Los ítems fueron guardaron satisfactoriamente.');
+        return $this->redirect(sprintf('@%s', $this->getUser()->getAttribute('referer_module', 'homepage')));
+      }
+      else
+      {
+        $this->getUser()->setFlash('error', 'Ocurrieron algunos errores. Por favor, intente nuevamente la operación.');
+      }
+    }
+  }
+  
+  public function executeGenerateRecord(sfWebRequest $request)
+  {
+        $cs = CourseSubjectPeer::retrieveByPK($request->getParameter('course_subject_id'));
+        $record = RecordPeer::retrieveByCourseOriginIdAndRecordType($cs->getId(), RecordType::COURSE);
+        if (!is_null($record))
+        {
+            $record->setStatus(RecordStatus::ANNULLED);
+            $record->save();
+        }
+        if($cs->getCourse()->isPathway())
+        {
+            $cs->generateRecordPathway();
+        }
+        else
+        {
+            $cs->generateRecord();
+        }
+        
+        $this->getUser()->setFlash('info', 'El acta fue generada correctamente.');
+        return $this->redirect(sprintf('@%s', $this->getUser()->getAttribute('referer_module', 'homepage')));
+              
+  }
+  
+  public function executePrintRecord(sfWebRequest $request)
+  {
+      $this->cs = CourseSubjectPeer::retrieveByPK($request->getParameter('course_subject_id'));
+      $this->record = RecordPeer::retrieveByCourseOriginIdAndRecordType($this->cs->getId(), RecordType::COURSE);
+      $this->setLayout('cleanLayout');
+      
+  }
+  
+  public function executeNotAverageableCalifications(sfWebRequest $request)
+  {
+    $this->course = $this->getCourse();
+    $this->course_subjects = $this->course->getCourseSubjectsForUser($this->getUser());
+    
+    $forms = array();
+
+    foreach ($this->course_subjects as $course_subject)
+    {
+      
+        $form_name = SchoolBehaviourFactory::getInstance()->getFormFactory()->getCourseSubjectNotAverageableMarksForm();
+        $forms[$course_subject->getId()] = new $form_name($course_subject);
+    }
+    
+    $this->forms = $forms;
+
+  }
+  
+  
+  public function executeUpdateNotAverageable(sfWebRequest $request)
+  {
+    if (!$request->isMethod('POST'))
+    {
+      $this->redirect('course_student_mark/notAverageableCalifications');
+    }
+
+    $this->course = $this->getCourse();
+    $this->course_subjects = $this->course->getCourseSubjectsForUser($this->getUser());
+    
+    foreach ($this->course_subjects as $course_subject)
+    {
+      
+        $form_name = SchoolBehaviourFactory::getInstance()->getFormFactory()->getCourseSubjectNotAverageableMarksForm();
+        $forms[$course_subject->getId()] = new $form_name($course_subject);
+    }
+    
+    $this->forms = $forms;
+    
+    
+    $valid = count($this->forms);
+
+    foreach ($this->forms as $form)
+    {
+      $form->bind($request->getParameter($form->getName()));
+
+      if ($form->isValid())
+      {
+        $valid--;
+      }
+    }
+
+    if ($valid == 0)
+    {
+      foreach ($this->forms as $form)
+      {
+        $form->save();
+      }
+      
+      
+      //Para cerrar curso
+      $course_subjects = $this->getCourse()->getCourseSubjects();
+      $all_closed = true;
+      foreach ($course_subjects as $cs)
+      { $calification_final = 0;
+        foreach($cs->getCourseSubjectStudentsNotAverageable() as $css)
+        {
+            if(!is_null($css->getNotAverageableCalification()))
+            {
+               $calification_final ++;
+            }
+        }
+        $result = false;
+        
+        if($calification_final == count($cs->getCourseSubjectStudentsNotAverageable()))
+        {
+            $result = true;
+        }
+        $all_closed = $all_closed && $result;
+      }
+
+      if ($all_closed)
+      {
+        //llevo el periodo al último
+            
+        $last_period =  $this->getCourse()->getCourseSubject()->getCareerSubjectSchoolYear()->getConfiguration()->getCourseMarks();
+        $this->course->setCurrentPeriod($last_period); 
+        $this->course->save();
+            
+      }
+      //FIN cerrar curso
+
+      $this->getUser()->setFlash('notice', 'Las calificaciones se guardaron satisfactoriamente.');
+      return $this->redirect(sprintf('@%s', $this->getUser()->getAttribute('referer_module', 'homepage')));
+    }
+    else
+    {
+      $this->getUser()->setFlash('error', 'Ocurrieron errores al intentar calificar los alumnos. Por favor, intente nuevamente la operación.');
+    }
+    $this->setTemplate('index');
+
+  }
+  
+  
     
 }

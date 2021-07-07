@@ -41,6 +41,10 @@ generator:
             label: Phone
             method: getPersonPhone
             decorator: text
+          person_alternative_phone:
+            label: Alternative phone
+            method: getPersonAlternativePhone
+            decorator: text
           person_email:
             label: Email
             method: getPersonEmail
@@ -48,6 +52,18 @@ generator:
           person_address:
             label: Address
             method: getPersonAddress
+            decorator: text
+          occupation:
+            label: Occupation
+            method: getOccupation
+            decorator: text
+          occupation_category:
+            label: Occupation category id
+            method: getOccupationCategory
+            decorator: text
+          study:
+            label: Study id
+            method: getStudy
             decorator: text
       fields:
         #necesario para que no se cuelgue el list

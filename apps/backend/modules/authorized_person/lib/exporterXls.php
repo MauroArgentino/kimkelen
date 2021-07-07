@@ -1,4 +1,5 @@
-<?php /*
+<?php 
+/*
  * Kimkëlen - School Management Software
  * Copyright (C) 2013 CeSPI - UNLP <desarrollo@cespi.unlp.edu.ar>
  *
@@ -16,18 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Kimkëlen.  If not, see <http://www.gnu.org/licenses/gpl-2.0.html>.
  */ ?>
+<?php
 
-<?php use_stylesheet('/css/report-card.css') ?>
-<?php use_helper('Date') ?>
-<div class="certificate-wrapper">
-	<div class="report-content">
-		<?php include_partial('certificate_header');?>
-		<div class="report-text">
-                        <?php include_partial('certificate_graduate_text',array('student'=> $student, 'p' => $p));?>
-			<?php include_partial('certificate_footer_text');?>
-		</div>
-		<div id="signature"><?php echo __('Firma de la Autoridad')?></div>
-	</div>
-</div>
-
-
+/**
+ * tutor exporter xls.
+ *
+ * @package    sistema de alumnos
+ * @subpackage tutor
+ * @author     Your name here
+ * @version    SVN: $Id: exporterXls.php 12474 2008-10-31 10:41:27Z fabien $
+ */
+class authorized_personExporterXls extends BaseAuthorized_personExporterXls
+{
+}

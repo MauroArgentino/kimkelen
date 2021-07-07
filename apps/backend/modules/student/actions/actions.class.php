@@ -741,7 +741,7 @@ class studentActions extends autoStudentActions
                 $csss = CourseSubjectStudentPeer::retrieveByCareerSchoolYearAndStudent($career_school_year, $student);
                 foreach ($csss as $css)
                 {	    
-                    if ( ! $css->getIsNotAverageable())
+                    if ( ! $css->getIsNotAverageable() || ($css->getIsNotAverageable() && ! is_null($css->getNotAverageableCalification())))
                     {
                         $sacs = StudentApprovedCareerSubjectPeer::retrieveByCourseSubjectStudent($css, $school_year);
                         
@@ -820,6 +820,24 @@ class studentActions extends autoStudentActions
     $this->back_url= $this->getUser()->getAttribute('back_url');
     $this->getUser()->setReferenceFor($this);
     $this->redirect("@medical_certificate");
-  }  
+  }
+
+  public function executePrintStudentPersonalCard(sfWebRequest $request)
+  {
+      $this->student = StudentPeer::retrieveByPk($request->getParameter('id'));
+      $this->setLayout('cleanLayout');
+      
+  }
+  
+  public function executeAuthorizedPersons(sfWebRequest $request)
+  {
+    $this->forward('authorized_person', 'indexByStudent');
+  }
+
+  public function executePrintObservationsCard(sfWebRequest $request)
+  {
+    $this->student = $this->getRoute()->getObject();
+    $this->student_career_school_years = $this->student->getStudentCareerSchoolYears();
+  }
 
 }

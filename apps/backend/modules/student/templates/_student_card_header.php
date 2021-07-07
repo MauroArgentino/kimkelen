@@ -16,18 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Kimkëlen.  If not, see <http://www.gnu.org/licenses/gpl-2.0.html>.
  */ ?>
-
-<?php use_stylesheet('/css/report-card.css') ?>
-<?php use_helper('Date') ?>
-<div class="certificate-wrapper">
-	<div class="report-content">
-		<?php include_partial('certificate_header');?>
-		<div class="report-text">
-                        <?php include_partial('certificate_withdrawn_text',array('student'=>$student,'p' => $p));?>
-			<?php include_partial('certificate_footer_text');?>
-		</div>
-		<div id="signature"><?php echo __('Firma de la Autoridad')?></div>
-	</div>
+<div class="header_student_card">
+    <div class="header-img">
+        <?php echo image_tag("kimkelen_logo.png", array( 'class'=>'logo_student_card', 'absolute' => true)) ?> 
+    </div> 
+    <div class="header-img">
+        <?php echo image_tag("unlp_logo.png", array( 'class'=>'logo_unlp_student_card', 'absolute' => true)) ?>
+    </div> 
+</div>
+<div class="title">
+    <div class='title-text'>
+        <h3> <?php echo __('Student card')?> </h3>
+    </div>
+    <div class='title-text'>
+        <?php $d =  $student->getLastStudentCareerSchoolYear()->getDivisions(); ?>
+        <h3> <?php echo __('División: ') ?> <?php echo ($d[0]) ?  $d[0] :''?></h3>
+    </div>
 </div>
 
 

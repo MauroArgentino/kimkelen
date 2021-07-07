@@ -134,8 +134,27 @@ class LvmSubjectStudentAnalytic extends BaseSubjectStudentAnalytic
             }
             else
             {
+                if($this->css->getIsNotAverageable() )
+                {
+                    if(! is_null($this->css->getNotAverageableCalification()) && $this->css->getNotAverageableCalification() == NotAverageableCalificationType::APPROVED)
+                    {
+                        return "Aprobado";
+                    }
+                    else
+                    {
+                        return $this->getNullLabel();
+                    }
+
+
+                }
+                else
+                {
+                
                 $sacs = $this->css->getStudentApprovedCourseSubject();          
                 return (!is_null($sacs) ? $sacs->getMark() : ($as_label ? $this->getNullLabel() : null));
+            
+                }
+                
             }  
             
         }
@@ -161,6 +180,20 @@ class LvmSubjectStudentAnalytic extends BaseSubjectStudentAnalytic
         {
             if (!$this->approved && is_null($this->css->getStudentApprovedCourseSubject()))
                 return $this->getNullLabel();
+            
+            if($this->css->getIsNotAverageable() )
+            {
+                if(! is_null($this->css->getNotAverageableCalification()) && $this->css->getNotAverageableCalification() == NotAverageableCalificationType::APPROVED)
+                {
+                    return "Aprobado";
+                }
+                else
+                {
+                    return $this->getNullLabel();
+                }
+
+
+            }
             $c = new num2text();
             $mark = $this->getMark();
             $mark_parts = explode(',', $mark);
@@ -185,7 +218,7 @@ class LvmSubjectStudentAnalytic extends BaseSubjectStudentAnalytic
             
             $approvation_instance= null;
             foreach ($introduccion as $course_subject_student)
-            {
+            { 
                 $course_result = $course_subject_student->getCourseResult();
                 if ($course_result)
                 {
@@ -199,11 +232,22 @@ class LvmSubjectStudentAnalytic extends BaseSubjectStudentAnalytic
                        }elseif(get_class($course_result) == 'StudentDisapprovedCourseSubject' && 
                                (is_null($approvation_instance) || get_class($approvation_instance) == 'StudentApprovedCourseSubject')) {
                            
-                           $approvation_instance=$course_result;
+                           $srcs = StudentRepprovedCourseSubjectPeer::retrieveByStudentApprovedCareerSubject($course_result->getStudentApprovedCareerSubject());
+                           
+                           if(is_null($srcs))
+                           {
+                               $approvation_instance=$course_result;
+                           }
+                           else
+                           {
+                               $approvation_instance=$srcs;
+                           }
                        }elseif(get_class($course_result) == 'StudentRepprovedCourseSubject')
                        {
                            $approvation_instance=$course_result;
-                       } 
+                       }
+
+                       
                    }     
                 }            
             }

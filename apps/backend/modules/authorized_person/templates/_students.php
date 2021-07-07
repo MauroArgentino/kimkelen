@@ -1,4 +1,5 @@
-<?php /*
+<?php 
+/*
  * Kimkëlen - School Management Software
  * Copyright (C) 2013 CeSPI - UNLP <desarrollo@cespi.unlp.edu.ar>
  *
@@ -16,18 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Kimkëlen.  If not, see <http://www.gnu.org/licenses/gpl-2.0.html>.
  */ ?>
-
-<?php use_stylesheet('/css/report-card.css') ?>
-<?php use_helper('Date') ?>
-<div class="certificate-wrapper">
-	<div class="report-content">
-		<?php include_partial('certificate_header');?>
-		<div class="report-text">
-			<?php include_partial('certificate_free_text',array('student'=> $student,'p' => $p));?>
-			<?php include_partial('certificate_footer_text');?>
-		</div>
-		<div id="signature"><?php echo __('Firma de la Autoridad')?></div>
-	</div>
+<div class="sf_admin_form_row sf_admin_text sf_admin_form_field_postal_address">
+  <ul>
+  <?php foreach($authorized_person->getStudentAuthorizedPersons() as $sap): ?>
+    <li><?php echo $sap->getStudent();?>    </li>
+  <?php endforeach ?>
+  </ul>
+  <div style="margin-top: 1px; clear: both;">
+  </div>
 </div>
-
-

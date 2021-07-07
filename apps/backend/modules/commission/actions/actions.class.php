@@ -205,6 +205,15 @@ class commissionActions extends autoCommissionActions
     $this->redirect("course_student_mark/index?id=" . $this->course->getId());
 
   }
+  
+  public function executeNotAverageableCalifications(sfWebRequest $request)
+  {
+    $this->course = $this->getRoute()->getObject();
+
+    $this->getUser()->setAttribute("referer_module", "commission");
+
+    $this->redirect("course_student_mark/notAverageableCalifications?id=".$this->course->getId());
+  }
 
   public function executeClose(sfWebRequest $request)
   {
@@ -406,5 +415,121 @@ class commissionActions extends autoCommissionActions
     $this->getUser()->setAttribute("referer_module", "commission");
     $this->redirect("course_student_mark/revertCalificateNonNumericalMark?id=" . $this->course->getId());
   }
+  
+  public function executeGenerateRecord(sfWebRequest $request)
+  {
+      $this->course = $this->getRoute()->getObject();
+      $this->course_subjects = $this->course->getCourseSubjects();
+      $this->url = 'commission';
+      $this->getUser()->setAttribute("referer_module", "commission");
+      if (count($this->course_subjects) == 1)
+      {          
+          $this->redirect("course_student_mark/generateRecord?course_subject_id=" . $this->course->getCourseSubject()->getId());
+      }
+      
+      
+  }
+  
+  public function executeAssignPhysicalSheet(sfWebRequest $request)
+  {
+      $this->course = $this->getRoute()->getObject();
+      $this->course_subjects = $this->course->getCourseSubjects();
+      $this->title = 'Assign physical sheet';
+      $this->action = 'assignPhysicalSheet';
+      $this->url = 'commission';
+      $this->getUser()->setAttribute("referer_module", "commission");
+      if (count($this->course_subjects) == 1)
+      { 
+          
+          $this->redirect("course_student_mark/assignPhysicalSheet?course_subject_id=" . $this->course->getCourseSubject()->getId());
+      }
+      
+  }
+  
+  public function executePrintRecord(sfWebRequest $request)
+  {
+      $this->course = $this->getRoute()->getObject();
+      $this->course_subjects = $this->course->getCourseSubjects();
+      $this->url = 'commission';
+      $this->title = 'Print record';
+      $this->action = 'printRecord';
+      
+      if (count($this->course_subjects) == 1)
+      { 
+          $this->getUser()->setAttribute("referer_module", "commission");
+          $this->redirect("course_student_mark/printRecord?course_subject_id=" . $this->course->getCourseSubject()->getId());
+      }
+      
+      $this->setTemplate('assignPhysicalSheet','commission');
+      
+  }
+
+   public function executeCalificateNonNumericalMarkInCurrentPeriod(sfWebRequest $request)
+  {
+    $course = $this->getRoute()->getObject();
+    $con = (is_null($con)) ? Propel::getConnection() : $con;
+    try
+    {
+        $con->beginTransaction();
+        $course_subject_students = $course->getIsAverageableCourseSubjectStudent();
+
+        foreach($course_subject_students as $course_subject_student)
+        {
+              //$course_subject_student->setIsNotAverageable(true);
+              $course_subject_student_mark = CourseSubjectStudentMarkPeer::retrieveByCourseSubjectStudentAndPeriod($course_subject_student->getId(),$course->getCurrentPeriod());
+              $course_subject_student_mark->setIsClosed(true);
+              $course_subject_student_mark->save($con);
+
+        }
+
+        if ($course->getCourseSubject()->countMarks() < ($course->getCurrentPeriod() + 1))
+        {
+            $course->setIsClosed(true);
+        }
+        $course->setCurrentPeriod($course->getCurrentPeriod() + 1);
+        $course->save($con);
+        $con->commit();
+        $this->getUser()->setFlash('info', 'Los alumnos fueron eximidos correctamente.');
+    }
+     catch (Exception $e)
+    {
+      $con->rollBack();
+      $this->getUser()->setFlash('error', 'Ocurrió un error. Intente nuevamente.');
+    }
+
+    $this->redirect('@commission');
+  }
+  public function executeRevertCalificateNonNumericalMarkInCurrentPeriod(sfWebRequest $request)
+  {
+    $course = $this->getRoute()->getObject();
+    $con = (is_null($con)) ? Propel::getConnection() : $con;
+    try
+    {
+        $con->beginTransaction();
+        $course_subject_students = $course->getIsAverageableCourseSubjectStudent();
+
+        foreach($course_subject_students as $course_subject_student)
+        {
+              //$course_subject_student->setIsNotAverageable(true);
+              $course_subject_student_mark = CourseSubjectStudentMarkPeer::retrieveByCourseSubjectStudentAndPeriod($course_subject_student->getId(),$course->getCurrentPeriod());
+              $course_subject_student_mark->setIsClosed(false);
+              $course_subject_student_mark->save($con);
+
+        }
+        $course->setCurrentPeriod($course->getCurrentPeriod() - 1);
+        $course->save($con);
+        $con->commit();
+        $this->getUser()->setFlash('info', 'Los alumnos fueron deseximidos correctamente.');
+    }
+    catch (Exception $e)
+    {
+      $con->rollBack();
+       $this->getUser()->setFlash('error', 'Ocurrió un error. Intente nuevamente.');
+    }
+
+    $this->redirect('@commission');
+  }
+
+
    
 }

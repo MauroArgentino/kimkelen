@@ -48,6 +48,10 @@ class BaseSchoolBehaviour extends InterfaceSchoolBehaviour
   protected $form_factory; /* Used for delegating custom forms used for several
    * actions depending on each school behaviour
    */
+  
+  const LINES_COURSES = 'renglones_folio_cursada';
+  const LINES_EXAMINATION = 'renglones_folio_examen';
+  const LINES_PATHWAY = 'renglones_folio_trayectoria' ;
 
   public function __construct(BaseFormFactory $form_factory)
   {
@@ -1081,7 +1085,7 @@ class BaseSchoolBehaviour extends InterfaceSchoolBehaviour
     $c->add(CoursePeer::SCHOOL_YEAR_ID, $school_year->getId());
     $c->addJoin(CourseSubjectPeer::COURSE_ID, CoursePeer::ID);
     $c->addJoin(CourseSubjectStudentPeer::COURSE_SUBJECT_ID, CourseSubjectPeer::ID);
-    $c->add(CourseSubjectStudentPeer::IS_NOT_AVERAGEABLE, false);
+    //$c->add(CourseSubjectStudentPeer::IS_NOT_AVERAGEABLE, false);
     $c->addJoin(CourseSubjectPeer::CAREER_SUBJECT_SCHOOL_YEAR_ID, CareerSubjectSchoolYearPeer::ID);
     CareerSubjectSchoolYearPeer::sorted($c);
 	

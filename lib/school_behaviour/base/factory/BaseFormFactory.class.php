@@ -313,4 +313,13 @@ abstract class BaseFormFactory extends InterfaceFormFactory{
       return 'AnalyticForm';    
   }
   
+  public function getAuthorizedPersonForm()
+  {
+    return 'AuthorizedPersonForm';
+  }
+  
+  public function getCourseSubjectNotAverageableMarksForm()
+  {
+    return 'CourseSubjectNotAverageableMarksForm';
+  }
 }

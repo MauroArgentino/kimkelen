@@ -1903,7 +1903,7 @@ class Student extends BaseStudent
                         "fecha"=> $css->getApprovedDate() ? $css->getApprovedDate()->format('d/m/Y') : NULL,
                         "nota"=> $css->getMark(),
                         "resultado"=> ($css->getMark())?"Aprobado" : "Desaprobado",
-                        "folio_fisico"=> "",
+                        "folio_fisico"=>  (!is_null($css->getBookSheet())) ? $css->getBookSheet()->getPhysicalSheet(): '',
                         "acta_resolucion"=> "",
                         "promedio"=> ($analytical->has_completed_career()) ? round($analytical->get_total_average(),2) : NULL ,
                         "promedio_sin_aplazos"=> "",
@@ -1921,6 +1921,42 @@ class Student extends BaseStudent
     {
         return !is_null($this->getCareerStudent());  
 
+    }
+    
+    public function getYearsOld()
+    { 
+        $start_date = new DateTime($this->getPerson()->getBirthdate());
+        //hoy
+        $now = new DateTime("now");
+        $interval = $now->diff($start_date);
+        $years = $interval->format('%y');
+        return $years;
+    }
+    
+    public function getWithdrawalAuthorizationString()
+    {
+        return ($this->getWithdrawalAuthorization())? 'Sí': 'No';
+    }
+    
+    public function getPhotosAuthorizationString()
+    {
+        return ($this->getPhotosAuthorization())? 'Sí': 'No';
+    }
+    
+    public function getStudentAuthorizedPersonsString()
+    {
+      $ap = array();
+      foreach ($this->getStudentAuthorizedPersons() as $sap)
+      {
+        $ap[] = $sap->getAuthorizedPerson() . " (" . $sap->getAuthorizedPerson()->getPerson()->getFullIdentification() . ")";
+      }
+
+      return implode(',  ', $ap);
+    }
+    
+    public function canPrintStudentCard()
+    {
+        return $this->getIsRegistered();
     }
   
 }

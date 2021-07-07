@@ -240,6 +240,74 @@ class division_courseActions extends autoDivision_courseActions
     $this->redirect("course_student_mark/calificateNonNumericalMark?id=" . $this->course->getId());
   }
 
+  public function executeCalificateNonNumericalMarkInCurrentPeriod(sfWebRequest $request)
+  {
+    $course = $this->getRoute()->getObject();
+    $con = (is_null($con)) ? Propel::getConnection() : $con;
+
+    try
+    {
+        $con->beginTransaction();
+        $course_subject_students = $course->getIsAverageableCourseSubjectStudent();
+		  
+        foreach($course_subject_students as $course_subject_student)
+        {
+              //$course_subject_student->setIsNotAverageable(true);
+              $course_subject_student_mark = CourseSubjectStudentMarkPeer::retrieveByCourseSubjectStudentAndPeriod($course_subject_student->getId(),$course->getCurrentPeriod());
+              $course_subject_student_mark->setIsClosed(true);
+              $course_subject_student_mark->save($con);
+
+        }
+                
+ 	if ($course->getCourseSubject()->countMarks() < ($course->getCurrentPeriod() + 1))
+        {
+            $course->setIsClosed(true);
+        }
+        $course->setCurrentPeriod($course->getCurrentPeriod() + 1);
+
+        $course->save($con);
+        $con->commit();
+        $this->getUser()->setFlash('info', 'Los alumnos fueron eximidos correctamente.');
+    }
+    catch (Exception $e)
+    {
+      $con->rollBack();
+      $this->getUser()->setFlash('error', 'Ocurrió un error. Intente nuevamente.');
+    }
+    
+    $this->redirect('@division_course');
+  }
+  public function executeRevertCalificateNonNumericalMarkInCurrentPeriod(sfWebRequest $request)
+  {
+    $course = $this->getRoute()->getObject();
+    $con = (is_null($con)) ? Propel::getConnection() : $con;
+    try
+    {
+        $con->beginTransaction();
+        $course_subject_students = $course->getIsAverageableCourseSubjectStudent();
+		  
+        foreach($course_subject_students as $course_subject_student)
+        {
+              //$course_subject_student->setIsNotAverageable(true);
+              $course_subject_student_mark = CourseSubjectStudentMarkPeer::retrieveByCourseSubjectStudentAndPeriod($course_subject_student->getId(),$course->getCurrentPeriod()-1);
+              $course_subject_student_mark->setIsClosed(false);
+              $course_subject_student_mark->save($con);
+
+        }
+        $course->setCurrentPeriod($course->getCurrentPeriod() - 1);
+        $course->save($con);
+        $con->commit();
+        $this->getUser()->setFlash('info', 'Los alumnos fueron deseximidos correctamente.');
+    }
+    catch (Exception $e)
+    {
+      $con->rollBack();
+      $this->getUser()->setFlash('error', 'Ocurrió un error. Intente nuevamente.');
+    }
+    
+    $this->redirect('@division_course');
+  }
+
   public function executeChangelogMarks(sfWebRequest $request)
   {
     $this->course = $this->getRoute()->getObject();
@@ -260,4 +328,48 @@ class division_courseActions extends autoDivision_courseActions
     $this->getUser()->setAttribute("referer_module", "division_course");
     $this->redirect("course_student_mark/revertCalificateNonNumericalMark?id=" . $this->course->getId());
   }
+  
+  public function executeGenerateRecord(sfWebRequest $request)
+  {
+        $course = $this->getRoute()->getObject();     
+        $cs = $course->getCourseSubject();
+        $record = RecordPeer::retrieveByCourseOriginIdAndRecordType($cs->getId(), RecordType::COURSE);
+        
+        if (!is_null($record))
+        {
+            $record->setStatus(RecordStatus::ANNULLED);
+            $record->save();
+        }
+        
+        $cs->generateRecord();
+        $this->getUser()->setFlash('info', 'El acta fue generada correctamente.');
+        $this->redirect('@division_course');
+              
+  }
+  
+  public function executeAssignPhysicalSheet(sfWebRequest $request)
+  {
+      $course = $this->getRoute()->getObject();     
+      $cs = $course->getCourseSubject();
+      $this->getUser()->setAttribute("referer_module", "division_course");
+      $this->redirect("course_student_mark/assignPhysicalSheet?course_subject_id=" . $cs->getId());
+  }
+  
+  public function executePrintRecord(sfWebRequest $request)
+  {
+      $course = CoursePeer::retrieveByPK($request->getParameter('id')); 
+      $this->cs = $course->getCourseSubject();
+      $this->redirect("course_student_mark/printRecord?course_subject_id=" . $this->cs->getId());
+         
+  }
+  
+  public function executeNotAverageableCalifications(sfWebRequest $request)
+  {
+    $this->course = $this->getRoute()->getObject();
+
+    $this->getUser()->setAttribute("referer_module", "division_course");
+
+    $this->redirect("course_student_mark/notAverageableCalifications?id=".$this->course->getId());
+  }
+  
 }

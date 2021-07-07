@@ -702,7 +702,17 @@ class CourseSubjectStudent extends BaseCourseSubjectStudent
     }
     
     if ($config != null && !$config->isNumericalMark())
-    {
+    { 
+        if($this->getIsNotAverageable() && ! is_null($this->getNotAverageableCalification()))
+        {
+            if($this->getNotAverageableCalification() == NotAverageableCalificationType::APPROVED)
+            {
+               return  "T. Completa";
+            }else
+            {
+                return "T. en Curso";
+            }
+        }
       $letter_average = LetterMarkAveragePeer::getLetterMarkAverageByCourseSubjectStudent($this);
       
       if(! is_null($letter_average)){
@@ -713,7 +723,21 @@ class CourseSubjectStudent extends BaseCourseSubjectStudent
     }
     else
     {
-      return $this->getMarksAverage();
+        if($this->getIsNotAverageable() && ! is_null($this->getNotAverageableCalification()))
+        { 
+            if($this->getNotAverageableCalification() == NotAverageableCalificationType::APPROVED)
+            {
+               return  "T. Completa";
+            }else
+            {
+                return "T. en Curso";
+            }
+        }
+        elseif($this->getIsNotAverageable() && is_null($this->getNotAverageableCalification()))
+        {
+            return "Eximido";
+        }
+        return $this->getMarksAverage();
     }
   }
   
@@ -739,6 +763,46 @@ class CourseSubjectStudent extends BaseCourseSubjectStudent
           }
       }
       return TRUE;
+  }
+  
+  public function getMarksAsArray()
+  {
+      $marks = array();
+      foreach ($this->getCourseSubjectStudentMarks() as $cssm)
+      {
+          $marks[$cssm->getMarkNumber()]=$cssm->getMark();
+      }
+      return $marks;
+  }
+  
+   public function getObservationForIsClosed($mark_number, PropelPDO $con = null)
+  {
+    $mark = $this->getMarkFor($mark_number);
+  
+    if ($mark)
+    {
+      return ($mark->getIsClosed() && !is_null($mark->getObservationMark())) ? $mark->getObservationMark()->getDescription() : null;
+    }
+    else
+    {
+      return null;
+    }
+
+  }
+
+   public function getLetterObservationForIsClosed($mark_number, PropelPDO $con = null)
+  {
+    $mark = $this->getMarkFor($mark_number);
+  
+    if ($mark)
+    {
+      return ($mark->getIsClosed() && !is_null($mark->getObservationMark())) ? $mark->getObservationMark()->getLetter() : null;
+    }
+    else
+    {
+      return null;
+    }
+
   }
 
 }
